@@ -5,22 +5,21 @@ use Dompdf\Dompdf;
 // Include database connection
 include('db.php');
 
-// Get s_id from the query
-$s_id = isset($_GET['s_id']) ? (int)$_GET['s_id'] : null;
+// Get request_no from the query
+$request_no = isset($_GET['request_no']) ? (int)$_GET['request_no'] : null;
 
-if (!$s_id) {
-    echo "Missing sample ID.";
+if (!$request_no) {
+    echo "Missing request number.";
     exit;
 }
 
-// Fetch all evaluation results for the specific sample ID with panelist details
+// Fetch all evaluation results for the specific request number with panelist details
 $stmt = $conn->prepare("
     SELECT h.p_id, h.rating, h.remarks, h.name, h.institution_name, h.date_submitted, er.sample_code_no, h.date_checked
     FROM hedonic h
-    JOIN evaluation_requests er ON h.s_id = er.s_id
-    WHERE h.s_id = ?
-");
-$stmt->bind_param("i", $s_id);
+    JOIN evaluation_requests er ON h.request_no = er.request_no
+    WHERE h.request_no = ?");
+$stmt->bind_param("i", $request_no);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -30,7 +29,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 if (empty($rows)) {
-    echo "No evaluation data found for this sample ID.";
+    echo "No evaluation data found for this request number.";
     exit;
 }
 
@@ -245,5 +244,5 @@ $dompdf->loadHtml($html);
 $dompdf->render();
 
 // Output the generated PDF to the browser
-$dompdf->stream("evaluation_results_sample_{$s_id}.pdf", ["Attachment" => true]);
+$dompdf->stream("evaluation_results_request_{$request_no}.pdf", ["Attachment" => true]);
 ?>

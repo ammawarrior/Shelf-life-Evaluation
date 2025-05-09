@@ -1,8 +1,13 @@
 <?php
 include('db.php'); // Include the database connection
 
-// Get s_id from query or use default
-$s_id = isset($_GET['s_id']) ? (int)$_GET['s_id'] : null;
+// Get request_no from query or use default
+$request_no = isset($_GET['request_no']) ? (int)$_GET['request_no'] : null;
+
+// Check if request_no is valid before proceeding
+if ($request_no === null) {
+    die("Invalid request number."); // Handle the case where request_no is not provided
+}
 
 // Descriptive terms mapping
 $descriptive_terms = [
@@ -18,15 +23,20 @@ $descriptive_terms = [
 ];
 
 // Query to get sample details
-$stmt = $conn->prepare("SELECT sample_code_no, sample_description, date_of_computation, request_no FROM evaluation_requests WHERE s_id = ?");
-$stmt->bind_param("i", $s_id);
+$stmt = $conn->prepare("SELECT sample_code_no, lab_code_no, date_of_computation, request_no FROM evaluation_requests WHERE request_no = ?");
+$stmt->bind_param("i", $request_no);
 $stmt->execute();
 $sample_details = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+// Check if sample details were found
+if (!$sample_details) {
+    die("Sample details not found."); // Handle the case where no details are found
+}
+
 // Query the data for hedonic table
-$stmt = $conn->prepare("SELECT p_id, rating FROM hedonic WHERE s_id = ? AND rating IS NOT NULL ORDER BY p_id ASC");
-$stmt->bind_param("i", $s_id);
+$stmt = $conn->prepare("SELECT p_id, rating FROM hedonic WHERE request_no = ? AND rating IS NOT NULL ORDER BY p_id ASC");
+$stmt->bind_param("i", $request_no);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -179,9 +189,9 @@ $second_half = array_slice($rows, 25);
     <div class="section-body" style="margin: 20px;">
         <!-- Displaying the Sample Details -->
         <div style="text-align: left;">
-            <p><strong>Sample Code:</strong> <?php echo htmlspecialchars($sample_details['sample_code_no']); ?></p>
             <p><strong>Request No.:</strong> <?php echo htmlspecialchars($sample_details['request_no']); ?></p>
-            <p><strong>Sample Description:</strong> <?php echo htmlspecialchars($sample_details['sample_description']); ?></p>
+            <p><strong>Sample Code:</strong> <?php echo htmlspecialchars($sample_details['lab_code_no']); ?></p>
+            <p><strong>Sample Description:</strong> <?php echo htmlspecialchars($sample_details['sample_code_no']); ?></p>
             <p><strong>Date of Computation:</strong> <?php echo htmlspecialchars(date("F j, Y", strtotime($sample_details['date_of_computation']))); ?></p>
         </div>
         <br>
@@ -272,7 +282,6 @@ $second_half = array_slice($rows, 25);
                 <label style="display: block; text-align: left;">STM -007-F2</label>
                 <label style="display: block; text-align: left;">Revision 0</label>
                 <label style="display: block; text-align: left;"><i>Effectivity Date: 24 June 2020</i></label>
-
             </div>
         </div>
     </div>

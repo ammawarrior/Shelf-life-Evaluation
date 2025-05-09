@@ -2,16 +2,46 @@
 <html lang="en">
 
 <head>
-    <?php include('header.php'); 
+    <?php include('includes/header.php');
     
-    // Get p_id and s_id from URL
-$p_id = isset($_GET['p_id']) ? (int)$_GET['p_id'] : null;
-$s_id = isset($_GET['s_id']) ? (int)$_GET['s_id'] : null;
+    // Get p_id and request_no from URL
+    $p_id = isset($_GET['p_id']) ? (int)$_GET['p_id'] : null;
+    $request_no = isset($_GET['request_no']) ? (int)$_GET['request_no'] : null;
 
-if (!$p_id || !$s_id) {
-    echo "<h4 style='color:red;'>Missing panelist or sample ID in the URL.</h4>";
-    exit;
-}
+    if (!$request_no) {
+        echo "<h4 style='color:red;'>Missing request number in the URL.</h4>";
+        exit;
+    }
+
+    // Include database connection
+    include('db.php'); // Include database connection here
+
+    // Fetch the highest p_id for the given request_no
+    $stmt = $conn->prepare("SELECT MAX(p_id) AS max_p_id FROM hedonic WHERE request_no = ?");
+    $stmt->bind_param("i", $request_no);
+    $stmt->execute();
+    $stmt->bind_result($max_p_id);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Determine the new p_id
+    if ($max_p_id === null) {
+        $p_id = 1; // Start from 1 if no p_id exists
+    } elseif ($max_p_id < 50) {
+        $p_id = $max_p_id + 1; // Increment the highest p_id
+    } else {
+        echo "<h4 style='color:red;'>Maximum number of panelists reached (50).</h4>";
+        exit; // Stop execution if the limit is reached
+    }
+
+    // Insert the new p_id and request_no into the hedonic table
+    $insert_stmt = $conn->prepare("INSERT INTO hedonic (p_id, request_no) VALUES (?, ?)");
+    $insert_stmt->bind_param("ii", $p_id, $request_no);
+    if (!$insert_stmt->execute()) {
+        echo "<h4 style='color:red;'>Error inserting panelist ID: " . $insert_stmt->error . "</h4>";
+        exit;
+    }
+    $insert_stmt->close();
 
     ?>
 </head>
@@ -22,7 +52,6 @@ if (!$p_id || !$s_id) {
             <?php
             include('includes/topnav.php');
             include('includes/sidebar.php');
-            include('db.php'); // Include database connection here
             ?>
             <!-- Start app main Content -->
             <div class="main-content">
@@ -37,20 +66,13 @@ if (!$p_id || !$s_id) {
                             <div class="card">
                                 <?php
                                 // Fetch Sample Code from evaluation_request table
-                                $s_id = 11;
-                                $sample_code_query = "SELECT sample_code_no FROM evaluation_requests WHERE s_id = ?";
+                                $sample_code_query = "SELECT sample_code_no FROM evaluation_requests WHERE request_no = ?";
                                 $stmt = $conn->prepare($sample_code_query);
-                                $stmt->bind_param("i", $s_id);
+                                $stmt->bind_param("i", $request_no);
                                 $stmt->execute();
                                 $stmt->bind_result($sample_code);
                                 $stmt->fetch();
                                 $stmt->close();
-
-                                // Count Panelist No. from hedonic table
-                                $panelist_query = "SELECT COUNT(*) + 1 AS panelist_no FROM hedonic";
-                                $result = $conn->query($panelist_query);
-                                $panelist_no = $result->fetch_assoc()['panelist_no'];
-                                $result->free();
                                 ?>
                                 <div class="card-body">
                                     <p><strong>Date of Evaluation: </strong><?php echo date("Y-m-d"); ?></p>
@@ -65,7 +87,7 @@ if (!$p_id || !$s_id) {
                 <form action="submit_hedonic.php" method="POST">
                     <!-- Add inside <form> -->
                 <input type="hidden" name="p_id" value="<?php echo $p_id; ?>">
-                <input type="hidden" name="s_id" value="<?php echo $s_id; ?>">
+                <input type="hidden" name="request_no" value="<?php echo $request_no; ?>">
                 <input type="hidden" name="date_submitted" value="<?php echo date('Y-m-d'); ?>">
 
                 <div class="form-group">
@@ -152,7 +174,7 @@ if (!$p_id || !$s_id) {
             </div>
 
             <?php
-            include('footer.php');
+            include('includes/footer.php');
             ?>
         </div>
     </div>

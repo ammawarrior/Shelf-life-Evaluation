@@ -9,8 +9,13 @@
 <?php
 include('db.php'); // Include the database connection
 
-// Get s_id from query or use default
-$s_id = isset($_GET['s_id']) ? (int)$_GET['s_id'] : null;
+// Get request_no from query or use default
+$request_no = isset($_GET['request_no']) ? (int)$_GET['request_no'] : null;
+
+// Check if request_no is valid before proceeding
+if ($request_no === null) {
+    die("Invalid request number."); // Handle the case where request_no is not provided
+}
 
 // Descriptive terms mapping
 $descriptive_terms = [
@@ -26,15 +31,20 @@ $descriptive_terms = [
 ];
 
 // Query to get sample details
-$stmt = $conn->prepare("SELECT sample_code_no, sample_description, date_of_computation, request_no FROM evaluation_requests WHERE s_id = ?");
-$stmt->bind_param("i", $s_id);
+$stmt = $conn->prepare("SELECT sample_code_no, lab_code_no, date_of_computation, request_no FROM evaluation_requests WHERE request_no = ?");
+$stmt->bind_param("i", $request_no);
 $stmt->execute();
 $sample_details = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+// Check if sample details were found
+if (!$sample_details) {
+    die("Sample details not found."); // Handle the case where no details are found
+}
+
 // Query the data for hedonic table
-$stmt = $conn->prepare("SELECT p_id, rating FROM hedonic WHERE s_id = ? AND rating IS NOT NULL ORDER BY p_id ASC");
-$stmt->bind_param("i", $s_id);
+$stmt = $conn->prepare("SELECT p_id, rating FROM hedonic WHERE request_no = ? AND rating IS NOT NULL ORDER BY p_id ASC");
+$stmt->bind_param("i", $request_no);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -64,7 +74,7 @@ $second_half = array_slice($rows, 25);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php include('header.php'); ?>
+    <?php include('includes/header.php'); ?>
     <title>Hedonic Summary</title>
 
     <style>
@@ -126,7 +136,8 @@ $second_half = array_slice($rows, 25);
 <body class="layout-4">
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
-            <?php include('topnav.php'); include('sidebar.php'); ?>
+            <?php include('includes/topnav.php'); ?>
+            <?php include('includes/sidebar.php'); ?>
 
             <div class="main-content">
                 <div class="section-header text-center">
@@ -137,10 +148,9 @@ $second_half = array_slice($rows, 25);
                 </div>
 
                 <div class="section-body">
-                    <!-- Displaying the Sample Details -->
-                    <p><strong>Sample Code:</strong> <?php echo htmlspecialchars($sample_details['sample_code_no']); ?></p>
                     <p><strong>Request No.:</strong> <?php echo htmlspecialchars($sample_details['request_no']); ?></p>
-                    <p><strong>Sample Description:</strong> <?php echo htmlspecialchars($sample_details['sample_description']); ?></p>
+                    <p><strong>Sample Code:</strong> <?php echo htmlspecialchars($sample_details['lab_code_no']); ?></p>
+                    <p><strong>Sample Description:</strong> <?php echo htmlspecialchars($sample_details['sample_code_no']); ?></p>
                     <p><strong>Date of Computation:</strong> <?php echo htmlspecialchars(date("F j, Y", strtotime($sample_details['date_of_computation']))); ?></p>
 
             <div class="table-container" style="margin-bottom: 0px;">
@@ -223,12 +233,12 @@ $second_half = array_slice($rows, 25);
             <p><strong>Checked by:</strong><u>_______________________</u> || <strong>Signature/Date:</strong><u>_______________________</u></p>
         </div>
                 <div class="text-center mt-4">
-                    <a href="generate_printable_summary.php?s_id=<?php echo $s_id; ?>" class="btn btn-secondary" target="_blank">Print</a>
+                    <a href="generate_printable_summary.php?request_no=<?php echo $request_no; ?>" class="btn btn-secondary" target="_blank">Print</a>
                 </div>
             </div>
         </div>
 
-            <?php include('footer.php'); ?>
+            <?php include('includes/footer.php'); ?>
         </div>
     </div>
 
