@@ -52,7 +52,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                             $actionButton = "<button class='btn btn-sm btn-secondary' disabled>Already Submitted</button>";
                         } else {
                             $link = ($type === 'Hedonic Scale') 
-                            ? 'panelist_access.php?request_no=' . urlencode($row['request_no']) 
+                            ? 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no']) 
                             : 'panelist.php?request_no=' . urlencode($row['request_no']);
                         
                         $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Evaluate Now</a>";
@@ -69,7 +69,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                         $actionButton = "<button class='btn btn-sm btn-secondary' disabled>Already Submitted</button>";
                     } else {
                         $link = ($type === 'Hedonic Scale') 
-                        ? 'panelist_access.php?request_no=' . urlencode($row['request_no']) 
+                        ? 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no']) 
                         : 'panelist.php?request_no=' . urlencode($row['request_no']);
                     
                     $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Evaluate Now</a>";
@@ -221,7 +221,7 @@ if ($result && $result->num_rows > 0) {
                     $actionButton = "<button class='btn btn-sm btn-secondary' disabled>Already Submitted</button>";
                 } else {
                     $link = ($type === 'Hedonic Scale') 
-                    ? 'panelist_access.php?request_no=' . urlencode($row['request_no']) 
+                    ? 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no']) 
                     : 'panelist.php?request_no=' . urlencode($row['request_no']);
                 
                 $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Evaluate Now</a>";
@@ -238,7 +238,7 @@ if ($result && $result->num_rows > 0) {
                 $actionButton = "<button class='btn btn-sm btn-secondary' disabled>Already Submitted</button>";
             } else {
                 $link = ($type === 'Hedonic Scale') 
-    ? 'panelist_access.php?request_no=' . urlencode($row['request_no']) 
+    ? 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no']) 
     : 'panelist.php?request_no=' . urlencode($row['request_no']);
 
 $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Evaluate Now</a>";
