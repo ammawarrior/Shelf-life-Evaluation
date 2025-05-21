@@ -1,14 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
 include('includes/header.php');
 include 'db.php';
-
-$user_id = $_SESSION['user_id'];
 
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
     ob_start();
@@ -43,21 +35,8 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                     if ($countRow['completed'] >= 12) {
                         $actionButton = "<button class='btn btn-sm btn-warning' disabled>Evaluation Full</button>";
                     } else {
-                        $check = $conn->prepare("SELECT * FROM evaluation_assignments WHERE request_no = ? AND user_id = ? AND is_submitted = 1");
-                        $check->bind_param("si", $request_no, $user_id);
-                        $check->execute();
-                        $checkResult = $check->get_result();
-
-                        if ($checkResult->num_rows > 0) {
-                            $actionButton = "<button class='btn btn-sm btn-secondary' disabled>Already Submitted</button>";
-                        } else {
-                            $link = ($type === 'Hedonic Scale') 
-                            ? 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no'])
-                            : 'panelist.php?request_no=' . urlencode($row['request_no']);
-                        
-                        $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Evaluate Now</a>";
-                        
-                        }
+                        $link = 'login.php?redirect=panelist.php&request_no=' . urlencode($row['request_no']);
+                        $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Login to Evaluate</a>";
                     }
                 } else {
                     // Check for Hedonic Scale submissions limit
@@ -70,20 +49,8 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                     if ($hedonicCountRow['completed'] >= 50) {
                         $actionButton = "<button class='btn btn-sm btn-warning' disabled>Evaluation Full</button>";
                     } else {
-                        $check = $conn->prepare("SELECT * FROM evaluation_assignments WHERE request_no = ? AND user_id = ? AND is_submitted = 1");
-                        $check->bind_param("si", $request_no, $user_id);
-                        $check->execute();
-                        $checkResult = $check->get_result();
-
-                        if ($checkResult->num_rows > 0) {
-                            $actionButton = "<button class='btn btn-sm btn-secondary' disabled>Already Submitted</button>";
-                        } else {
-                            $link = ($type === 'Hedonic Scale') 
-                            ? 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no'])
-                            : 'panelist.php?request_no=' . urlencode($row['request_no']);
-                        
+                        $link = 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no']);
                         $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Evaluate Now</a>";
-                        }
                     }
                 }
 
@@ -113,6 +80,10 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
     <link rel="stylesheet" href="assets/modules/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="assets/modules/datatables/Select-1.2.4/css/select.bootstrap4.min.css">
     <style>
+
+        body {
+            background-color: #f0eff1;
+        }
         @media (max-width: 768px) {
             .desktop-table { display: none; }
             .mobile-card { display: block; }
@@ -165,7 +136,6 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
 </div>
 <div id="app">
     <div class="main-wrapper main-wrapper-1">
-        <?php include('includes/topnav.php'); ?>
         <?php include('includes/sidebar.php'); ?>
 
         <div class="main-content">
@@ -222,21 +192,8 @@ if ($result && $result->num_rows > 0) {
             if ($countRow['completed'] >= 12) {
                 $actionButton = "<button class='btn btn-sm btn-warning' disabled>Evaluation Full</button>";
             } else {
-                $check = $conn->prepare("SELECT * FROM evaluation_assignments WHERE request_no = ? AND user_id = ? AND is_submitted = 1");
-                $check->bind_param("si", $request_no, $user_id);
-                $check->execute();
-                $checkResult = $check->get_result();
-
-                if ($checkResult->num_rows > 0) {
-                    $actionButton = "<button class='btn btn-sm btn-secondary' disabled>Already Submitted</button>";
-                } else {
-                    $link = ($type === 'Hedonic Scale') 
-                    ? 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no'])
-                    : 'panelist.php?request_no=' . urlencode($row['request_no']);
-                
-                $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Evaluate Now</a>";
-                
-                }
+                $link = 'login.php?redirect=panelist.php&request_no=' . urlencode($row['request_no']);
+                $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Login to Evaluate</a>";
             }
         } else {
             // Check for Hedonic Scale submissions limit
@@ -249,20 +206,8 @@ if ($result && $result->num_rows > 0) {
             if ($hedonicCountRow['completed'] >= 50) {
                 $actionButton = "<button class='btn btn-sm btn-warning' disabled>Evaluation Full</button>";
             } else {
-                $check = $conn->prepare("SELECT * FROM evaluation_assignments WHERE request_no = ? AND user_id = ? AND is_submitted = 1");
-                $check->bind_param("si", $request_no, $user_id);
-                $check->execute();
-                $checkResult = $check->get_result();
-
-                if ($checkResult->num_rows > 0) {
-                    $actionButton = "<button class='btn btn-sm btn-secondary' disabled>Already Submitted</button>";
-                } else {
-                    $link = ($type === 'Hedonic Scale') 
-                    ? 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no'])
-                    : 'panelist.php?request_no=' . urlencode($row['request_no']);
-                
+                $link = 'hedonic_evaluation_form.php?request_no=' . urlencode($row['request_no']);
                 $actionButton = "<a href='" . $link . "' class='btn btn-sm btn-success'>Evaluate Now</a>";
-                }
             }
         }
 
@@ -287,7 +232,6 @@ if ($result && $result->num_rows > 0) {
                                 <div id="mobile-card-content">
                                     <!-- Initial content rendered from PHP above -->
                                     <!-- This will be auto-reloaded via JS -->
-                                    <!-- No need to duplicate the card PHP block here -->
                                 </div>
                             </div>
 
@@ -338,4 +282,4 @@ setInterval(reloadMobileCards, 1000);
 </script>
 
 </body>
-</html>
+</html> 

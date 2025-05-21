@@ -50,32 +50,17 @@ $result = $stmt->get_result();
 
 $total_score = 0;
 $total_panelists = 0;
+$rows = [];
 
-// Initialize array with 50 empty positions
-$rows = array_fill(0, 50, [
-    'p_id' => 0,
-    'term' => '',
-    'rating' => ''
-]);
-
-// Fill in the actual submissions in their correct positions
 while ($row = $result->fetch_assoc()) {
-    $p_id = $row['p_id'] - 1; // Convert to 0-based index
     $term = $descriptive_terms[$row['rating']] ?? 'N/A';
-    $rows[$p_id] = [
+    $rows[] = [
         'p_id' => $row['p_id'],
         'term' => $term,
         'rating' => $row['rating']
     ];
     $total_score += $row['rating'];
     $total_panelists++;
-}
-
-// Fill in the p_id for empty positions
-for ($i = 0; $i < 50; $i++) {
-    if ($rows[$i]['p_id'] === 0) {
-        $rows[$i]['p_id'] = $i + 1;
-    }
 }
 
 // Calculate mean only if there are 50 panelists
@@ -158,6 +143,7 @@ $second_half = array_slice($rows, 25);
         }
 
         .mean-score-table {
+            width: 78%;
             margin-top: 5px;
             font-size: 25px;
         }
@@ -255,11 +241,33 @@ $second_half = array_slice($rows, 25);
                                     </table>
                                 </div>
 
+                                <!-- Legend Table -->
+                                <table class="table table-bordered legend-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center; width: 55%;">Descriptive Term</th>
+                                            <th style="text-align: center; width: 20%;">Numerical Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($descriptive_terms as $score => $term): ?>
+                                            <tr>
+                                                <td style="padding: 3px; text-align: left;">
+                                                    <?= htmlspecialchars($term) ?>
+                                                </td>
+                                                <td style="padding: 3px; text-align: center;">
+                                                    <?= htmlspecialchars($score) ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+
                                 <!-- Mean Numerical Score -->
                                 <?php if ($mean_score !== null): ?>
                                     <table class="table table-bordered mean-score-table">
                                         <tr>
-                                            <td style="text-align: right; font-weight: bold;">
+                                            <td style="text-align: right; font-weight: bold; width: 70%;">
                                                 Mean Numerical Score
                                             </td>
                                             <td style="text-align: center; font-weight: bold; width: 20%;">
@@ -269,8 +277,17 @@ $second_half = array_slice($rows, 25);
                                     </table>
                                 <?php endif; ?>
 
-                                <div class="text-right mt-4">
-                                    <a href="generate_printable_summary_pdf.php?request_no=<?= htmlspecialchars($request_no) ?>" class="btn btn-success btn-sm" target="_blank">Print Hedonic Summary</a>
+                                <div style="text-align: left; margin-top: 20px;">
+                                    <p><strong>1.</strong> A mean numerical score of <strong>5</strong> or <strong>"Neither like nor dislike"</strong> is an indicative of unacceptable sensory evaluation of the sample.</p>
+                                    <p><strong>Remarks:</strong> Mean numerical score value of <strong>"<?= htmlspecialchars($mean_score) ?>"</strong> showed that product was <strong>"<?= htmlspecialchars($descriptive_terms[$mean_score] ?? 'N/A') ?>"</strong> by the general population who participated in the sensory evaluation conducted.</p>
+                                    <br>
+                                    <p><strong>Computed by:</strong> <u>_______________________</u> || <strong>Signature/Date:</strong> <u>_______________________</u></p> <br>
+
+                                    <p><strong>Checked by:</strong><u>_______________________</u> || <strong>Signature/Date:</strong><u>_______________________</u></p>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <a href="generate_printable_summary.php?request_no=<?= htmlspecialchars($request_no) ?>" class="btn btn-secondary" target="_blank">Print</a>
                                 </div>
                             </div>
                         </div>

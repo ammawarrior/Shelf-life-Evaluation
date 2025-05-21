@@ -18,8 +18,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $date_of_computation = date('Y-m-d H:i:s');
         $sensory_type = $_POST['sensory_type'];
 
-        $stmt = $conn->prepare("INSERT INTO evaluation_requests (request_no, lab_code_no, sample_code_no, date_of_computation, sensory_type) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $request_no, $lab_code_no, $sample_code_no, $date_of_computation, $sensory_type);
+        $stmt = $conn->prepare("INSERT INTO evaluation_requests (s_id, request_no, lab_code_no, sample_code_no, date_of_computation, sensory_type) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssss", $s_id, $request_no, $lab_code_no, $sample_code_no, $date_of_computation, $sensory_type);
 
         if ($stmt->execute()) {
             $_SESSION['success_message'] = "Evaluation request added successfully!";
@@ -105,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 </thead>
                                                 <tbody>
 <?php
-$query = "SELECT request_no, lab_code_no, sample_code_no, sensory_type, date_of_computation, status FROM evaluation_requests ORDER BY date_of_computation DESC";
+$query = "SELECT s_id,request_no, lab_code_no, sample_code_no, sensory_type, date_of_computation, status FROM evaluation_requests ORDER BY date_of_computation DESC";
 $result = $conn->query($query);
 
 if ($result && $result->num_rows > 0) {
@@ -126,17 +126,16 @@ if ($result && $result->num_rows > 0) {
             <td>{$row['sample_code_no']}</td>
             <td>{$typeBadge}</td>
             <td>
-                    <a href='" . 
-                        ($row['sensory_type'] === 'Hedonic Scale' 
-                            ? "hedonic_evaluation_form.php?request_no=" 
-                            : "monitoring.php?request_no=") 
-                        . urlencode($row['request_no']) . "' 
-                        class='btn btn-sm btn-warning' title='Edit'>
-                        <i class='fas fa-pen'></i>
-                    </a>
+                    " . ($row['sensory_type'] === 'Hedonic Scale' 
+                        ? "<button type='button' class='btn btn-sm btn-warning' onclick='showHedonicAlert()' title='Edit not available for Hedonic Scale'>
+                            <i class='fas fa-pen'></i>
+                           </button>"
+                        : "<a href='monitoring.php?request_no=" . urlencode($row['request_no']) . "' 
+                            class='btn btn-sm btn-warning' title='Edit'>
+                            <i class='fas fa-pen'></i>
+                           </a>") . "
 
-
-                <a href='toggle_evaluation.php?request_no=" . urlencode($row['request_no']) . "' class='btn btn-sm $btnClass' title='$tooltip'>
+                <a href='toggle_evaluation.php?s_id=" . urlencode($row['s_id']) . "' class='btn btn-sm $btnClass' title='$tooltip'>
                     <i class='fas $iconClass'></i>
                 </a>
                 <a href='" . 
@@ -328,7 +327,16 @@ if ($result && $result->num_rows > 0) {
     });
     </script>
     
-
+    <script>
+    function showHedonicAlert() {
+        Swal.fire({
+            icon: 'info',
+            title: 'Not Applicable',
+            text: 'Edit feature is not available for Hedonic Scale evaluations.',
+            confirmButtonColor: '#3085d6'
+        });
+    }
+    </script>
 
 </body>
 </html>

@@ -18,7 +18,7 @@ if ($name && $institution_name && $rating) {
 
     if ($stmt->execute()) {
         // Redirect to analyst.php after successful update
-        header("Location: analyst.php");
+        header("Location: public_dashboard.php");
         exit; // Ensure no further code is executed after the redirect
     } else {
         echo "Error: " . $stmt->error;
