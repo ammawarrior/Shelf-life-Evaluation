@@ -9,7 +9,7 @@ include('db.php');
 session_start();
 
 // Get request_no from the query
-$request_no = isset($_GET['request_no']) ? (int)$_GET['request_no'] : null;
+$request_no = isset($_GET['request_no']) ? $_GET['request_no'] : null;
 
 if (!$request_no) {
     echo "Missing request number.";
