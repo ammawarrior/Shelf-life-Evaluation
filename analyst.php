@@ -182,51 +182,87 @@ if ($result && $result->num_rows > 0) {
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="evaluationModal" tabindex="-1" role="dialog" aria-labelledby="evaluationModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <form method="POST">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">New Evaluation Request</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Sensory Type</label>
-                            <select name="sensory_type" class="form-control" required>
-                                <option value="">Select Type</option>
-                                <option value="Triangle Test">Triangle Test</option>
-                                <option value="Hedonic Scale">Hedonic Scale</option>
-                            </select>
+     <!-- Modal -->
+<div class="modal fade" id="evaluationModal" tabindex="-1" role="dialog" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document"> <!-- modal-lg for wider layout -->
+        <form method="POST">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Evaluation Request</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+   
+                                <div class="form-group">
+                                    <label>Request Code</label>
+                                    <input type="text" class="form-control" name="request_no" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Sample Code</label>
+                                    <input type="text" class="form-control" name="lab_code_no" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Sample Description</label>
+                                    <input type="text" class="form-control" name="sample_code_no" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Date of Entry</label>
+                                    <input type="date" name="date_of_computation" class="form-control" required value="">
+                                </div>   
+
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                            <div class="form-group">
+                                    <label>Select Analyst</label>
+                                    <select name="analyst" class="form-control" required>
+                                        <option value="">Select Analyst</option>
+                                        <option value="Gia Marie Cagubcub">Gia Marie B. Cagubcub</option>
+                                        <option value="Marl Andrian Patrick H. Dalinao">Marl Andrian Patrick H. Dalinao</option>
+                                        <option value="Shenna Grace Eran">Shenna Grace P. Eran</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Sensory Type</label>
+                                    <select name="sensory_type" class="form-control" id="sensoryTypeSelect" required>
+                                        <option value="">Select Type</option>
+                                        <option value="Triangle Test">Triangle Test</option>
+                                        <option value="Hedonic Scale">Hedonic Scale</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="triangleItemCountWrapper" style="display: none;">
+                                    <label>Triangle Test Count</label>
+                                    <select name="triangle_item_count" class="form-control">
+                                        <option value="">Select Count</option>
+                                        <option value="12" selected>12</option>
+                                        <!-- <option value="15">15</option> -->
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Request Code</label>
-                            <input type="text" class="form-control" name="request_no" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Sample Code</label>
-                            <input type="text" class="form-control" name="lab_code_no" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Sample Description</label>
-                            <input type="text" class="form-control" name="sample_code_no" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Date of Computation</label>
-                            <input type="text" class="form-control" value="<?php echo date('Y-m-d H:i:s'); ?>" readonly>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn" style="background-color: #3b4c7d; color: white;">Submit</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
-            </form>
-        </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn" style="background-color: #3b4c7d; color: white;">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- JS Scripts -->
     <script src="assets/bundles/lib.vendor.bundle.js"></script>
