@@ -3,16 +3,25 @@ session_start();
 require 'vendor/autoload.php';
 use Dompdf\Dompdf;
 
+// Debug logging
+error_log("Request No from GET: " . (isset($_GET['request_no']) ? $_GET['request_no'] : 'not set'));
+
 // Include database connection
 include('db.php');
 
 // Get request_no from query or use default
-$request_no = isset($_GET['request_no']) ? (int)$_GET['request_no'] : null;
+$request_no = isset($_GET['request_no']) ? $_GET['request_no'] : null;
+
+// Debug logging
+error_log("Request No after processing: " . ($request_no ?? 'null'));
 
 // Check if request_no is valid before proceeding
 if ($request_no === null) {
     die("Invalid request number.");
 }
+
+// Debug: Log the type of request_no
+error_log("Request No type: " . gettype($request_no));
 
 // Descriptive terms mapping
 $descriptive_terms = [
@@ -27,23 +36,48 @@ $descriptive_terms = [
     1 => "Dislike Extremely"
 ];
 
+// Debug: Log the SQL query for sample details
+error_log("Executing sample details query for request_no: " . $request_no);
+
 // Query to get sample details
 $stmt = $conn->prepare("SELECT sample_code_no, lab_code_no, date_of_computation, request_no FROM evaluation_requests WHERE request_no = ?");
-$stmt->bind_param("i", $request_no);
+$stmt->bind_param("s", $request_no);
 $stmt->execute();
 $sample_details = $stmt->get_result()->fetch_assoc();
 $stmt->close();
+
+// Debug: Log the sample details result
+error_log("Sample details result: " . print_r($sample_details, true));
 
 // Check if sample details were found
 if (!$sample_details) {
     die("Sample details not found.");
 }
 
+// Debug: Log the SQL query for hedonic data
+error_log("Executing hedonic data query for request_no: " . $request_no);
+
 // Query the data for hedonic table
 $stmt = $conn->prepare("SELECT p_id, rating FROM hedonic WHERE request_no = ? AND rating IS NOT NULL ORDER BY p_id ASC");
-$stmt->bind_param("i", $request_no);
+$stmt->bind_param("s", $request_no);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Debug: Log the number of rows found
+$row_count = $result->num_rows;
+error_log("Number of hedonic ratings found: " . $row_count);
+
+// Debug: Log the first few rows of hedonic data
+$first_rows = [];
+$counter = 0;
+while ($row = $result->fetch_assoc() && $counter < 5) {
+    $first_rows[] = $row;
+    $counter++;
+}
+error_log("First few rows of hedonic data: " . print_r($first_rows, true));
+
+// Reset the result pointer
+$result->data_seek(0);
 
 $total_score = 0;
 $total_panelists = 0;
@@ -59,6 +93,9 @@ while ($row = $result->fetch_assoc()) {
     $total_score += $row['rating'];
     $total_panelists++;
 }
+
+// Debug: Log the total score and panelists
+error_log("Total score: " . $total_score . ", Total panelists: " . $total_panelists);
 
 // Calculate mean only if there are 50 panelists
 $mean_score = ($total_panelists === 50) ? round($total_score / 50) : null;

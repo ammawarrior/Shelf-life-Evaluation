@@ -10,7 +10,7 @@ $request_no = $_GET['request_no'];
 
 // Check if evaluation is already full (50 panelists)
 $countQuery = $conn->prepare("SELECT COUNT(*) as count FROM hedonic WHERE request_no = ?");
-$countQuery->bind_param("i", $request_no);
+$countQuery->bind_param("s", $request_no);
 $countQuery->execute();
 $countResult = $countQuery->get_result();
 $countRow = $countResult->fetch_assoc();
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['panelist_name'])) {
     } else {
         // Check if code name exists for this request
         $check_stmt = $conn->prepare("SELECT p_id FROM hedonic WHERE request_no = ? AND name = ?");
-        $check_stmt->bind_param("is", $request_no, $panelist_name);
+        $check_stmt->bind_param("ss", $request_no, $panelist_name);
         $check_stmt->execute();
         $check_result = $check_stmt->get_result();
         
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['panelist_name'])) {
             
             // Check if evaluation is already submitted
             $submit_check = $conn->prepare("SELECT date_submitted FROM hedonic WHERE request_no = ? AND p_id = ?");
-            $submit_check->bind_param("ii", $request_no, $p_id);
+            $submit_check->bind_param("ss", $request_no, $p_id);
             $submit_check->execute();
             $submit_result = $submit_check->get_result();
             $submit_row = $submit_result->fetch_assoc();
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['panelist_name'])) {
             
             // Generate new p_id
             $maxQuery = $conn->prepare("SELECT MAX(p_id) as max_p_id FROM hedonic WHERE request_no = ?");
-            $maxQuery->bind_param("i", $request_no);
+            $maxQuery->bind_param("s", $request_no);
             $maxQuery->execute();
             $maxResult = $maxQuery->get_result();
             $maxRow = $maxResult->fetch_assoc();
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['panelist_name'])) {
 
             // Insert new p_id and code name into hedonic table
             $insert_stmt = $conn->prepare("INSERT INTO hedonic (p_id, request_no, name) VALUES (?, ?, ?)");
-            $insert_stmt->bind_param("iis", $p_id, $request_no, $panelist_name);
+            $insert_stmt->bind_param("sss", $p_id, $request_no, $panelist_name);
             if ($insert_stmt->execute()) {
                 header("Location: hedonic_evaluation_form.php?request_no=" . $request_no . "&show_form=1&p_id=" . $p_id . "&name=" . urlencode($panelist_name));
                 exit();
@@ -158,7 +158,7 @@ if (!isset($p_id) || !isset($panelist_name)) {
 
 // Verify the p_id and name match in the database
 $verify_stmt = $conn->prepare("SELECT p_id FROM hedonic WHERE request_no = ? AND p_id = ? AND name = ?");
-$verify_stmt->bind_param("iis", $request_no, $p_id, $panelist_name);
+$verify_stmt->bind_param("sis", $request_no, $p_id, $panelist_name);
 $verify_stmt->execute();
 $verify_result = $verify_stmt->get_result();
 
@@ -198,7 +198,7 @@ if ($verify_result->num_rows === 0) {
                                 <?php
                                 $sample_code_query = "SELECT sample_code_no FROM evaluation_requests WHERE request_no = ?";
                                 $stmt = $conn->prepare($sample_code_query);
-                                $stmt->bind_param("i", $request_no);
+                                $stmt->bind_param("s", $request_no);
                                 $stmt->execute();
                                 $stmt->bind_result($sample_code);
                                 $stmt->fetch();

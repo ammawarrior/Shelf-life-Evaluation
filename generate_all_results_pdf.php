@@ -16,6 +16,9 @@ if (!$request_no) {
     exit;
 }
 
+// Debug logging
+error_log("Request No from GET: " . $request_no);
+
 // Get the logged in analyst's name
 $analyst_name = 'Unknown User';
 if (isset($_SESSION['user_id'])) {
@@ -30,15 +33,21 @@ if (isset($_SESSION['user_id'])) {
     $stmt->close();
 }
 
+// Debug logging
+error_log("Executing hedonic data query for request_no: " . $request_no);
+
 // Fetch all evaluation results for the specific request number with panelist details
 $stmt = $conn->prepare("
     SELECT h.p_id, h.rating, h.remarks, h.name, h.institution_name, h.date_submitted, er.sample_code_no, er.date_of_computation
     FROM hedonic h
     JOIN evaluation_requests er ON h.request_no = er.request_no
     WHERE h.request_no = ?");
-$stmt->bind_param("i", $request_no);
+$stmt->bind_param("s", $request_no); // Changed from "i" to "s" for string
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Debug logging
+error_log("Number of rows found: " . $result->num_rows);
 
 $rows = [];
 while ($row = $result->fetch_assoc()) {
@@ -51,6 +60,9 @@ while ($row = $result->fetch_assoc()) {
     }
     $rows[] = $row;
 }
+
+// Debug logging
+error_log("Processed rows: " . count($rows));
 
 if (empty($rows)) {
     echo "No evaluation data found for this request number.";

@@ -10,7 +10,7 @@
 include('db.php'); // Include the database connection
 
 // Get request_no from query or use default
-$request_no = isset($_GET['request_no']) ? (int)$_GET['request_no'] : null;
+$request_no = isset($_GET['request_no']) ? $_GET['request_no'] : null;
 
 // Check if request_no is valid before proceeding
 if ($request_no === null) {
