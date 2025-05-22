@@ -32,7 +32,7 @@ $descriptive_terms = [
 
 // Query to get sample details
 $stmt = $conn->prepare("SELECT sample_code_no, lab_code_no, date_of_computation, request_no FROM evaluation_requests WHERE request_no = ?");
-$stmt->bind_param("i", $request_no);
+$stmt->bind_param("s", $request_no);
 $stmt->execute();
 $sample_details = $stmt->get_result()->fetch_assoc();
 $stmt->close();
@@ -44,7 +44,7 @@ if (!$sample_details) {
 
 // Query the data for hedonic table
 $stmt = $conn->prepare("SELECT p_id, rating FROM hedonic WHERE request_no = ? AND rating IS NOT NULL ORDER BY p_id ASC");
-$stmt->bind_param("i", $request_no);
+$stmt->bind_param("s", $request_no);
 $stmt->execute();
 $result = $stmt->get_result();
 
