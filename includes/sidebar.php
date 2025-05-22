@@ -52,7 +52,9 @@ $role = $_SESSION['role'] ?? 0; // Get user role from session
             <ul class="dropdown-menu">
             <?php if (isset($_SESSION['role']) && ($_SESSION['role'] == 1 || $_SESSION['role'] == 2)): ?>
                 <li><a class="nav-link" href="analyst.php">Evaluation</a></li>
-                <li><a class="nav-link" href="manage_user.php">Manage Users</a></li>
+                <?php if ($_SESSION['role'] == 1): ?>
+                    <li><a class="nav-link" href="manage_user.php">Manage Users</a></li>
+                <?php endif; ?>
             </ul>
         </li>
     </ul>
